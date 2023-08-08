@@ -16,6 +16,18 @@ plugins {
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['lib/src/main/java']
+        }
+        resources {
+            srcDirs = ['lib/src/main/resources']
+        }
+    }
+}
+
 test {
     // enables the build in jUnit 5 support for gradle
     // useful if you want to run unit tests as part of gradle check or gradle test
@@ -66,12 +78,18 @@ dependencies {
     
 }
 
-tasks.named('test') {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+task stage(dependsOn: ['clean', 'build']) {
+    doLast {
+        javaexec {
+            main = 'main.Main'
+            classpath = sourceSets.main.runtimeClasspath
+        }
+    }
 }
 
 bootJar {
+    mainClassName = 'main.Main'
     launchScript()
 }
+
 
