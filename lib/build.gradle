@@ -13,6 +13,9 @@ plugins {
     id 'java-library'
 }
 
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
 test {
     // enables the build in jUnit 5 support for gradle
     // useful if you want to run unit tests as part of gradle check or gradle test
@@ -68,12 +71,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-javaexec {
-    main = 'main.Main'
-    classpath = sourceSets.main.runtimeClasspath
-}
-
 bootJar {
-    mainClassName = 'main.Main'
+    launchScript()
 }
 
