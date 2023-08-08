@@ -79,5 +79,5 @@ task stage(dependsOn: ['clean', 'build']) {
 
 
 bootJar {
-    mainClassName = 'main.Main' // Replace with your main class
+    mainClassName = 'main.Main'
 }
