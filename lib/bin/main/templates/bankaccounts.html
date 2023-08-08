@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Bank Accounts</title>
+    <style>
+        body, input, button {
+            box-sizing: border-box; /* Include padding and border in element's total width */
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .section {
+            flex: 1;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 15px;
+            background: #fff;
+            border-radius: 8px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .balance-display {
+            margin-right: 20px;
+            font-size: 18px;
+        }
+
+        h2,
+        h3 {
+            color: #333;
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            color: red;
+            text-align: center;
+        }
+
+        .transactions table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .transactions th,
+        .transactions td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        .transactions th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Welcome <span th:text="${loggedInUser}"></span>!</h1>
+        <div class="header-right">
+            <span class="balance-display">Balance: <span th:text="${balance}"></span>€</span>
+            <a href="/logout">Logout</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="section">
+            <!-- Deposits -->
+            <h3>Deposits</h3>
+			<div class="transactions">
+			    <table>
+			        <thead>
+			            <tr>
+							<th>Timestamp</th>
+			                <th>Amount</th>
+			            </tr>
+			        </thead>
+			        <tbody th:each="transaction : ${transactions}" th:if="${transaction.type.name() == 'DEPOSIT'}">
+			            <tr>
+							<td th:text="${transaction.timestamp}"></td>
+			                <td th:text="${transaction.amount}"></td>
+			            </tr>
+			        </tbody>
+			    </table>
+			</div>
+			
+			<!-- Withdrawals -->
+			<h3>Withdrawals</h3>
+			<div class="transactions">
+			    <table>
+			        <thead>
+			            <tr>
+							<th>Timestamp</th>
+			                <th>Amount</th>
+			            </tr>
+			        </thead>
+			        <tbody th:each="transaction : ${transactions}" th:if="${transaction.type.name() == 'WITHDRAW'}">
+			            <tr>
+							<td th:text="${transaction.timestamp}"></td>
+			                <td th:text="${transaction.amount}"></td>
+			            </tr>
+			        </tbody>
+			    </table>
+			</div>
+        </div>
+        <div class="section">
+			
+			<!-- Transfers -->
+			<h3>Incoming Transactions</h3>
+            <div class="transactions">
+                <table>
+			        <thead>
+			            <tr>
+							<th>Timestamp</th>
+			                <th>Source Account</th>
+			                <th>Amount</th>
+			            </tr>
+			        </thead>
+			        <tbody th:each="transaction : ${transactions}" th:if="${transaction.type.name() == 'TRANSFER' && transaction.destinationAccountUsername == loggedInUser}">
+			            <tr>
+							<td th:text="${transaction.timestamp}"></td>
+			                <td th:text="${transaction.sourceAccountUsername}"></td>
+			                <td th:text="${transaction.amount}"></td>
+			            </tr>
+			        </tbody>
+			    </table>
+			</div>
+			
+			<!-- Transfers -->
+			<h3>Outgoing Transactions</h3>
+            <div class="transactions">
+                <table>
+			        <thead>
+			            <tr>
+							<th>Timestamp</th>
+			                <th>Destination Account</th>
+			                <th>Amount</th>
+			            </tr>
+			        </thead>
+			        <tbody th:each="transaction : ${transactions}" th:if="${transaction.type.name() == 'TRANSFER' && transaction.sourceAccountUsername == loggedInUser}">
+			            <tr>
+							<td th:text="${transaction.timestamp}"></td>
+			                <td th:text="${transaction.destinationAccountUsername}"></td>
+			                <td th:text="${transaction.amount}"></td>
+			            </tr>
+			        </tbody>
+			    </table>
+			</div>
+
+        </div>
+        <div class="section">
+            <h3>Deposit</h3>
+            <form action="/bankaccounts/deposit" method="post">
+                <input type="hidden" name="username" th:value="${loggedInUser}">
+                <input type="number" name="amount" step="0.01" min="0" placeholder="Enter amount" required>
+                <button type="submit">Deposit</button>
+            </form>
+
+            <h3>Withdraw</h3>
+            <form action="/bankaccounts/withdraw" method="post">
+                <input type="hidden" name="username" th:value="${loggedInUser}">
+                <input type="number" name="amount" step="0.01" min="0" placeholder="Enter amount" required>
+                <button type="submit">Withdraw</button>
+            </form>
+
+            <h3>Transfer</h3>
+            <form action="/bankaccounts/transfer" method="post">
+                <input type="hidden" name="sourceUsername" th:value="${loggedInUser}">
+                <input type="text" name="targetUsername" placeholder="Target Account Username" required>
+                <input type="number" name="amount" step="0.01" min="0" placeholder="Enter amount" required>
+                <button type="submit">Transfer</button>
+            </form>
+        </div>
+    </div>
+
+    <p th:if="${error}" th:text="${error}"></p>
+</body>
+
+</html>
