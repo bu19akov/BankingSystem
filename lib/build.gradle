@@ -13,14 +13,13 @@ plugins {
     id 'java-library'
 }
 
-
 sourceSets {
     main {
         java {
-            srcDirs = ['lib/src/main/java']
+            srcDir 'lib/src/main/java'
         }
         resources {
-            srcDirs = ['lib/src/main/resources']
+            srcDir 'lib/src/main/resources' // Include this if you have resources in this directory
         }
     }
 }
@@ -73,11 +72,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     
-}
-
-jar {
-    baseName = 'app'
-    version = '0.0.1'
 }
 
 bootJar {
