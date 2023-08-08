@@ -71,7 +71,7 @@ tasks.named('test') {
 task stage(dependsOn: ['clean', 'build']) {
     doLast {
         javaexec {
-            main = 'main.Main'
+            main = 'Main'
             classpath = sourceSets.main.runtimeClasspath
         }
     }
