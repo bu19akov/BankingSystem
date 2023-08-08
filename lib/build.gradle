@@ -68,6 +68,16 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+task stage(dependsOn: ['clean', 'build']) {
+    doLast {
+        javaexec {
+            main = 'main.Main'
+            classpath = sourceSets.main.runtimeClasspath
+        }
+    }
+}
+
+
 bootJar {
     mainClassName = 'main.Main' // Replace with your main class
 }
