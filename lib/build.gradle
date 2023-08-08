@@ -13,8 +13,6 @@ plugins {
     id 'java-library'
 }
 
-version = '0.0.1-SNAPSHOT'
-
 
 sourceSets {
     main {
@@ -75,6 +73,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     
+}
+
+jar {
+    baseName = 'app'
+    version = '0.0.1'
 }
 
 bootJar {
