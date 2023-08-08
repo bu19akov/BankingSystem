@@ -78,15 +78,6 @@ dependencies {
     
 }
 
-task stage(dependsOn: ['clean', 'build']) {
-    doLast {
-        javaexec {
-            main = 'main.Main'
-            classpath = sourceSets.main.runtimeClasspath
-        }
-    }
-}
-
 bootJar {
     mainClassName = 'main.Main'
     launchScript()
