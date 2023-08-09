@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Charity Accounts</title>
+    <style>
+      body,
+      button,
+      input {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif
+      }
+
+      body {
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0
+      }
+
+      header {
+        background-color: #007bff;
+        color: #fff;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      h1 {
+        margin: 0
+      }
+      
+      .header-right {
+        display: flex;
+        align-items: center;
+      }
+      
+      a {
+        color: #fff;
+        text-decoration: none;
+        margin-right: 20px;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+	
+      .balance-display {
+        margin-right: 20px;
+        font-size: 18px;
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between
+      }
+
+      .charity-section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+        flex: 1;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+        margin: 15px;
+        background: #fff;
+        border-radius: 8px
+      }
+      
+      .charity-section img {
+	    width: 300px;
+	    height: 200px;
+	    object-fit: cover;
+	  }
+	  
+      .charity-section h3 {
+        margin-bottom: 0;
+      }
+      
+      .charity-section h5 {
+        margin-top: 0;
+      }
+
+
+      h2,
+      h3 {
+        color: #333
+      }
+
+      button,
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px
+      }
+
+      button {
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer
+      }
+
+      button:hover {
+        background-color: #0056b3
+      }
+
+      img {
+        max-width: 100%;
+        height: auto
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Charity Organizations</h1>
+      <div class="header-right">
+            <span class="balance-display">Balance: <span th:text="${balance}"></span>€</span>
+            <a href="/bankaccounts">My Account</a>
+            <a href="/logout">Logout</a>
+      </div>
+    </header>
+    <div class="container">
+      <div class="charity-section">
+        <img src="/forest.png" alt="Charity 1">
+        <h3>Save the Forests</h3>
+        <h5 style="color: grey;">@SaveTheForests*</h5>
+        <p>Total: <span th:text="${balanceSaveTheForests}"></span>€</p>
+        <form action="/bankaccounts/transfer" method="post">
+		    <input type="hidden" name="sourceUsername" th:value="${loggedInUser}">
+		    <input type="hidden" name="targetUsername" value="SaveTheForests">
+		    <input type="hidden" name="redirectUrl" value="/bankaccounts/charity">
+		    <input type="number" name="amount" step="0.01" min="0.01" placeholder="Enter amount" required>
+		    <button type="submit">Donate</button>
+		</form>
+      </div>
+      <div class="charity-section">
+        <img src="/children.jpg" alt="Charity 2">
+        <h3>Feed the Children</h3>
+        <h5 style="color: grey;">@FeedTheChildren*</h5>
+        <p>Total: <span th:text="${balanceFeedTheChildren}"></span>€</p>
+        <form action="/bankaccounts/transfer" method="post">
+		  <input type="hidden" name="sourceUsername" th:value="${loggedInUser}">
+          <input type="hidden" name="targetUsername" value="FeedTheChildren">
+          <input type="hidden" name="redirectUrl" value="/bankaccounts/charity">
+          <input type="number" name="amount" step="0.01" min="0.01" placeholder="Enter amount" required>
+          <button type="submit">Donate</button>
+        </form>
+      </div>
+      <div class="charity-section">
+        <img src="/animals.jpg" alt="Charity 3">
+        <h3>Protect the Animals</h3>
+        <h5 style="color: grey;">@ProtectTheAnimals*</h5>
+        <p>Total: <span th:text="${balanceProtectTheAnimals}"></span>€</p>
+        <form action="/bankaccounts/transfer" method="post">
+		  <input type="hidden" name="sourceUsername" th:value="${loggedInUser}">
+          <input type="hidden" name="targetUsername" value="ProtectTheAnimals">
+          <input type="hidden" name="redirectUrl" value="/bankaccounts/charity">
+          <input type="number" name="amount" step="0.01" min="0.01" placeholder="Enter amount" required>
+          <button type="submit">Donate</button>
+        </form>
+      </div>
+    </div>
+    <p style="color: grey; margin-top: 0; margin-left: 20px;">* Use it to donate from other banks</p>
+    <p style="color: red; text-align: center;" th:if="${error}" th:text="${error}"></p>
+  </body>
+</html>

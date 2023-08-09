@@ -42,6 +42,26 @@ public class BankAccountController {
         return "login";
     }
     
+    @GetMapping("/bankaccounts/charity")
+    public String charityPage(Model model, HttpSession session) {
+        String loggedInUser = (String) session.getAttribute("loggedInUser");
+        if (loggedInUser != null) {
+            double balance = bankAccountService.getBalanceForUser(loggedInUser);
+            double balanceSaveTheForests = bankAccountService.getBalanceForUser("SaveTheForests");
+            double balanceFeedTheChildren = bankAccountService.getBalanceForUser("FeedTheChildren");
+            double balanceProtectTheAnimals = bankAccountService.getBalanceForUser("ProtectTheAnimals");
+            model.addAttribute("loggedInUser", loggedInUser);
+            model.addAttribute("balance", balance);
+            model.addAttribute("balanceSaveTheForests", balanceSaveTheForests);
+            model.addAttribute("balanceFeedTheChildren", balanceFeedTheChildren);
+            model.addAttribute("balanceProtectTheAnimals", balanceProtectTheAnimals);
+            return "charity"; // Returning the view for the logged-in user
+        } else {
+            return "redirect:/login"; // Redirect to login if the user is not logged in
+        }
+    }
+
+    
     @PostMapping("/login")
     public String login(@RequestParam String username, @RequestParam String password, Model model, HttpSession session) {
         try {
@@ -99,13 +119,17 @@ public class BankAccountController {
     }
     
     @PostMapping("/bankaccounts/transfer")
-    public String transfer(@RequestParam String sourceUsername, @RequestParam String targetUsername, @RequestParam double amount, Model model, HttpSession session) {
+    public String transfer(@RequestParam String sourceUsername, @RequestParam String targetUsername, @RequestParam double amount, @RequestParam String redirectUrl, Model model, HttpSession session) {
         try {
             bankAccountService.transfer(sourceUsername, targetUsername, amount);
-            return "redirect:/bankaccounts";
+            return "redirect:" + redirectUrl; // Redirect to the specified URL
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return getUserBankAccount(model, session);
+            if (redirectUrl.equals("/bankaccounts")) {
+            	return getUserBankAccount(model, session);
+            } else {
+            	return charityPage(model, session);
+            }
         }
     }
     
