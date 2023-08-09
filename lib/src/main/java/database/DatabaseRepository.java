@@ -97,7 +97,6 @@ public class DatabaseRepository {
         return transactions;
     }
 
-
     public static void saveTransaction(Transaction transaction) {
         Document document = new Document("_id", transaction.getId().toString())
         		.append("source_id", transaction.getSourceAccountUsername())

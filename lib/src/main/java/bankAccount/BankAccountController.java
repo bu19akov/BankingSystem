@@ -10,6 +10,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 
 import transaction.Transaction;
 
@@ -105,4 +108,16 @@ public class BankAccountController {
             return getUserBankAccount(model, session);
         }
     }
+    
+    @PostMapping("/bankaccounts/api/transfer")
+    public ResponseEntity<Object> receiveForeignTransfer(@RequestParam String sourceAccountUsername, @RequestParam String destinationAccountUsername, @RequestParam double amount) {
+        try {
+            bankAccountService.receiveForeignTransfer(sourceAccountUsername, destinationAccountUsername, amount);
+            return new ResponseEntity<>("Transaction was successfull", HttpStatus.OK);
+        } catch (Exception e) {
+            // Log the exception if needed
+            return new ResponseEntity<>("Transaction failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

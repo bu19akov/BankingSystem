@@ -61,6 +61,15 @@ public class BankAccount {
         }
     }
     
+    public synchronized void receiveForeignTransfer(String foreignUsername, BankAccount destination, double amount) {
+    	// lock the account with the lower id first to prevent the possibility of a deadlock
+    	// two-step locking
+        handleNegativeAmount(amount);
+        destination.internalDeposit(amount);
+        createForeignTransaction(foreignUsername, destination.username, amount, ETransactionType.TRANSFER);
+        logger.info("Account {}. Transaction received from {}. Amount: {}. New balance: {}", this.getUsername(), foreignUsername, amount, this.balance);
+    }
+    
     public void handleNegativeAmount(double amount) {
     	if (amount < 0) {
     		logger.error("Account {}. Attempted to deposit negative amount: {}", this.getUsername(), amount);
@@ -77,6 +86,11 @@ public class BankAccount {
     
     public void createTransaction(String destinationAccountUsername, double amount, ETransactionType type) {
     	Transaction transaction = new Transaction(this.username, destinationAccountUsername, amount, type);
+    	DatabaseRepository.saveTransaction(transaction);
+    }
+    
+    public void createForeignTransaction(String foreignUsername, String destinationAccountUsername, double amount, ETransactionType type) {
+    	Transaction transaction = new Transaction(foreignUsername, destinationAccountUsername, amount, type);
     	DatabaseRepository.saveTransaction(transaction);
     }
     

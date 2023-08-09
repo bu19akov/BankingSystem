@@ -72,4 +72,18 @@ public class BankAccountService {
             throw new IllegalArgumentException("Target account not found");
         }
     }
+    
+    // for outside Transactions
+    public void receiveForeignTransfer(String foreignUsername, String targetUsername, double amount) {
+        BankAccount targetAccount = DatabaseRepository.findAccountByUsername(targetUsername);
+        if (foreignUsername == null || foreignUsername == "") {
+        	throw new IllegalArgumentException("Username can't be empty");
+        }
+        if (targetAccount != null) {
+        	targetAccount.receiveForeignTransfer(foreignUsername, targetAccount, amount);
+            DatabaseRepository.updateAccount(targetAccount);
+        } else {
+            throw new IllegalArgumentException("Target account not found");
+        }
+    }
 }
