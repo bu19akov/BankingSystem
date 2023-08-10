@@ -61,19 +61,22 @@ public class DatabaseRepository {
     }
     
     public static double findTotalIncomingsTodayByUsername(String username) {
-    	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         String dateToday = formatter.format(new Date());
 
+        List<String> excludeDestinations = Arrays.asList("SaveTheForests", "FeedTheChildren", "ProtectTheAnimals");
+
         Document query = new Document("$and",
-    	    Arrays.asList(
-    	        new Document("destination_id", username),
-    	        new Document("$or", Arrays.asList(
-    	            new Document("type", ETransactionType.DEPOSIT.toString()),
-    	            new Document("type", ETransactionType.TRANSFER.toString())
-    	        )),
-    	        new Document("timestamp", new Document("$regex", "^" + dateToday))
-    	    )
-    	);
+            Arrays.asList(
+                new Document("destination_id", new Document("$nin", excludeDestinations)),
+                new Document("destination_id", username),
+                new Document("$or", Arrays.asList(
+                    new Document("type", ETransactionType.DEPOSIT.toString()),
+                    new Document("type", ETransactionType.TRANSFER.toString())
+                )),
+                new Document("timestamp", new Document("$regex", "^" + dateToday))
+            )
+        );
 
         double totalDepositsToday = 0;
         for (Document document : transactionsCollection.find(query)) {
@@ -82,6 +85,7 @@ public class DatabaseRepository {
 
         return totalDepositsToday;
     }
+
     
     public static double findTotalOutgoingsTodayByUsername(String username) {
     	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
