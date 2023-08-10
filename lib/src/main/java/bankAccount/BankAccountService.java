@@ -39,6 +39,15 @@ public class BankAccountService {
     }
 
     public void deposit(String username, double amount) {
+        if (amount <= 0 || amount > 10000) {
+            throw new IllegalArgumentException("Amount should be greater than 0 and less than or equal to 10000");
+        }
+
+        double totalIncomingsToday = DatabaseRepository.findTotalIncomingsTodayByUsername(username);
+        if (totalIncomingsToday + amount > 10000) {
+            throw new IllegalArgumentException("The daily limit for incoming transactions has been exceeded. New transactions will be available tomorrow.");
+        }
+
         BankAccount account = DatabaseRepository.findAccountByUsername(username);
         if (account != null) {
             account.deposit(amount);
@@ -48,7 +57,16 @@ public class BankAccountService {
         }
     }
 
+
     public void withdraw(String username, double amount) {
+    	if (amount <= 0 || amount > 10000) {
+            throw new IllegalArgumentException("Amount should be greater than 0 and less than or equal to 10000");
+        }
+
+        double totalOutgoingsToday = DatabaseRepository.findTotalOutgoingsTodayByUsername(username);
+        if (totalOutgoingsToday + amount > 10000) {
+            throw new IllegalArgumentException("The daily limit for outgoing transactions has been exceeded. New transactions will be available tomorrow.");
+        }
         BankAccount account = DatabaseRepository.findAccountByUsername(username);
         if (account != null) {
             account.withdraw(amount);
@@ -59,6 +77,20 @@ public class BankAccountService {
     }
     
     public void transfer(String sourceUsername, String targetUsername, double amount) {
+    	if (amount <= 0 || amount > 10000) {
+            throw new IllegalArgumentException("Amount should be greater than 0 and less than or equal to 10000");
+        }
+
+        double totalIncomingsToday = DatabaseRepository.findTotalIncomingsTodayByUsername(targetUsername);
+        if (totalIncomingsToday + amount > 10000) {
+            throw new IllegalArgumentException("Destionation's account daily limit for outgoing transactions has been exceeded. New transactions will be available tomorrow.");
+        }
+        
+        double totalOutgoingsToday = DatabaseRepository.findTotalOutgoingsTodayByUsername(sourceUsername);
+        if (totalOutgoingsToday + amount > 10000) {
+            throw new IllegalArgumentException("The daily limit for outgoing transactions has been exceeded. New transactions will be available tomorrow.");
+        }
+        
         BankAccount sourceAccount = DatabaseRepository.findAccountByUsername(sourceUsername);
         BankAccount targetAccount = DatabaseRepository.findAccountByUsername(targetUsername);
         if (sourceAccount != null && targetAccount != null) {
@@ -75,6 +107,15 @@ public class BankAccountService {
     
     // for outside Transactions
     public void receiveForeignTransfer(String foreignUsername, String targetUsername, double amount) {
+    	if (amount <= 0 || amount > 10000) {
+            throw new IllegalArgumentException("Amount should be greater than 0 and less than or equal to 10000");
+        }
+
+        double totalIncomingsToday = DatabaseRepository.findTotalIncomingsTodayByUsername(targetUsername);
+        if (totalIncomingsToday + amount > 10000) {
+            throw new IllegalArgumentException("Destionation's account daily limit for outgoing transactions has been exceeded. New transactions will be available tomorrow.");
+        }
+        
         BankAccount targetAccount = DatabaseRepository.findAccountByUsername(targetUsername);
         if (foreignUsername == null || foreignUsername == "") {
         	throw new IllegalArgumentException("Username can't be empty");

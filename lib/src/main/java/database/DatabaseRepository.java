@@ -15,7 +15,10 @@ import transaction.Transaction;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.UUID;
+
+import java.text.SimpleDateFormat;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -55,6 +58,52 @@ public class DatabaseRepository {
             return new BankAccount(usernameFound, balance);
         }
         return null;
+    }
+    
+    public static double findTotalIncomingsTodayByUsername(String username) {
+    	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        String dateToday = formatter.format(new Date());
+
+        Document query = new Document("$and",
+    	    Arrays.asList(
+    	        new Document("destination_id", username),
+    	        new Document("$or", Arrays.asList(
+    	            new Document("type", ETransactionType.DEPOSIT.toString()),
+    	            new Document("type", ETransactionType.TRANSFER.toString())
+    	        )),
+    	        new Document("timestamp", new Document("$regex", "^" + dateToday))
+    	    )
+    	);
+
+        double totalDepositsToday = 0;
+        for (Document document : transactionsCollection.find(query)) {
+            totalDepositsToday += document.getDouble("amount");
+        }
+
+        return totalDepositsToday;
+    }
+    
+    public static double findTotalOutgoingsTodayByUsername(String username) {
+    	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        String dateToday = formatter.format(new Date());
+
+        Document query = new Document("$and",
+    	    Arrays.asList(
+    	        new Document("source_id", username),
+    	        new Document("$or", Arrays.asList(
+    	            new Document("type", ETransactionType.WITHDRAW.toString()),
+    	            new Document("type", ETransactionType.TRANSFER.toString())
+    	        )),
+    	        new Document("timestamp", new Document("$regex", "^" + dateToday))
+    	    )
+    	);
+
+        double totalDepositsToday = 0;
+        for (Document document : transactionsCollection.find(query)) {
+            totalDepositsToday += document.getDouble("amount");
+        }
+
+        return totalDepositsToday;
     }
     
     public static void saveAccount(BankAccount account, String password) {
