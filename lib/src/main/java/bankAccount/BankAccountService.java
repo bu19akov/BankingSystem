@@ -13,7 +13,6 @@ import transaction.Transaction;
 public class BankAccountService {
 
     private static final Logger logger = LoggerFactory.getLogger(BankAccount.class);
-    // private static final double MAX_TRANSACTION_AMOUNT = 10000;
 
     public boolean verifyLogin(String username, String password) {
         return DatabaseRepository.verifyLogin(username, password);

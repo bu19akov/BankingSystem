@@ -1,6 +1,5 @@
 package bankAccount;
 
-import exceptions.InsufficientBalanceException;
 import transaction.ETransactionType;
 import transaction.Transaction;
 import database.DatabaseRepository;
@@ -10,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 public class BankAccount {
     private static final Logger logger = LoggerFactory.getLogger(BankAccount.class);
-    private static final double MAX_TRANSACTION_AMOUNT = 10000;
 
     private double balance;
     private final String username;
@@ -19,7 +17,7 @@ public class BankAccount {
     public BankAccount(String username, double initialBalance) {
         this.balance = initialBalance;
         this.username = username;
-        this.validator = new Validator();
+        this.validator = new Validator(username, initialBalance);
     }
 
     public synchronized void deposit(double amount) {
@@ -82,74 +80,4 @@ public class BankAccount {
     public String getUsername() {
 		return this.username;
     }
-    
-    private class Validator {
-    	private void validateTransaction(double amount, ETransactionType type) {
-            validateAmount(amount);
-            switch (type) {
-                case DEPOSIT:
-                case TRANSFER:
-                    validateIncomingsLimit(amount);
-                    break;
-                case WITHDRAW:
-                    validateSufficientBalance(amount);
-                    validateOutgoingsLimit(amount);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid transaction type");
-            }
-        }
-    	
-    	private void validateTransfer(BankAccount destination, double amount) {
-            validateAmount(amount);
-            validateSufficientBalance(amount);
-            validateOutgoingsLimit(amount);
-            validateIncomingsLimitForDestinationAccount(destination.getUsername(), amount);
-            if (username.equals(destination.getUsername())) {
-                throw new IllegalArgumentException("Destination account can't be your current account");
-            }
-        }
-
-        private void validateAmount(double amount) {
-            if (amount <= 0 || amount > MAX_TRANSACTION_AMOUNT) {
-                logger.error("Account {}. Attempted to deposit illegal amount: {}", username, amount);
-                throw new IllegalArgumentException("Amount should be greater than 0 and less than or equal to " + MAX_TRANSACTION_AMOUNT);
-            }
-        }
-
-        private void validateSufficientBalance(double amount) {
-            if (amount > balance) {
-                logger.error("Account {}. Attempted to withdraw more than current balance. Withdrawal amount: {}. Current balance: {}", username, amount, balance);
-                throw new InsufficientBalanceException("Cannot withdraw more than current balance.");
-            }
-        }
-
-        private void validateIncomingsLimit(double amount) {
-            double totalIncomingsToday = DatabaseRepository.findTotalIncomingsTodayByUsername(username);
-            double remainingLimit = MAX_TRANSACTION_AMOUNT - totalIncomingsToday;
-            if (totalIncomingsToday + amount > MAX_TRANSACTION_AMOUNT) {
-                String errorMessage = String.format("Transaction failed. The amount you are trying to receive exceeds the daily incoming limit. Remaining limit: %.2f€", remainingLimit);
-                throw new IllegalArgumentException(errorMessage);
-            }
-        }
-
-        private void validateIncomingsLimitForDestinationAccount(String username, double amount) {
-            double totalIncomingsToday = DatabaseRepository.findTotalIncomingsTodayByUsername(username);
-            double remainingLimit = MAX_TRANSACTION_AMOUNT - totalIncomingsToday;
-            if (totalIncomingsToday + amount > MAX_TRANSACTION_AMOUNT) {
-                String errorMessage = String.format("Transaction failed. The amount you are trying to send exceeds the destination's daily incoming limit. Remaining limit: %.2f€", remainingLimit);
-                throw new IllegalArgumentException(errorMessage);
-            }
-        }
-
-        private void validateOutgoingsLimit(double amount) {
-            double totalOutgoingsToday = DatabaseRepository.findTotalOutgoingsTodayByUsername(username);
-            double remainingLimit = MAX_TRANSACTION_AMOUNT - totalOutgoingsToday;
-            if (totalOutgoingsToday + amount > MAX_TRANSACTION_AMOUNT) {
-                String errorMessage = String.format("Transaction failed. The amount you are trying to send exceeds the daily outgoing limit. Remaining limit: %.2f€", remainingLimit);
-                throw new IllegalArgumentException(errorMessage);
-            }
-        }
-    }
-    
 }
