@@ -1,7 +1,5 @@
 package bankAccount;
 
-import java.util.List;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-
-import transaction.Transaction;
-
 @Controller
 public class BankAccountController {
 
@@ -24,43 +19,42 @@ public class BankAccountController {
 
     @GetMapping("/bankaccounts")
     public String getUserBankAccount(Model model, HttpSession session) {
-        String loggedInUser = (String) session.getAttribute("loggedInUser");
-        if (loggedInUser != null) {
-            double balance = bankAccountService.getBalanceForUser(loggedInUser);
-            List<Transaction> transactions = bankAccountService.getTransactionsForUser(loggedInUser);
-            model.addAttribute("loggedInUser", loggedInUser);
-            model.addAttribute("balance", balance);
-            model.addAttribute("transactions", transactions);
-            return "bankaccounts"; // Returning the view for the logged-in user
-        } else {
-            return "redirect:/login"; // Redirect to login if the user is not logged in
-        }
-    }
-    
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
+    	if (!isLoggedIn(session)) return "redirect:/login";
+    	String loggedInUser = getLoggedInUser(session);
+        model.addAttribute("loggedInUser", loggedInUser);
+        model.addAttribute("balance", bankAccountService.getBalanceForUser(loggedInUser));
+        model.addAttribute("transactions", bankAccountService.getTransactionsForUser(loggedInUser));
+        return "bankaccounts"; // Returning the view for the logged-in user
     }
     
     @GetMapping("/bankaccounts/charity")
     public String charityPage(Model model, HttpSession session) {
-        String loggedInUser = (String) session.getAttribute("loggedInUser");
-        if (loggedInUser != null) {
-            double balance = bankAccountService.getBalanceForUser(loggedInUser);
-            double balanceSaveTheForests = bankAccountService.getBalanceForUser("SaveTheForests");
-            double balanceFeedTheChildren = bankAccountService.getBalanceForUser("FeedTheChildren");
-            double balanceProtectTheAnimals = bankAccountService.getBalanceForUser("ProtectTheAnimals");
-            model.addAttribute("loggedInUser", loggedInUser);
-            model.addAttribute("balance", balance);
-            model.addAttribute("balanceSaveTheForests", balanceSaveTheForests);
-            model.addAttribute("balanceFeedTheChildren", balanceFeedTheChildren);
-            model.addAttribute("balanceProtectTheAnimals", balanceProtectTheAnimals);
-            return "charity"; // Returning the view for the logged-in user
-        } else {
-            return "redirect:/login"; // Redirect to login if the user is not logged in
-        }
+    	if (!isLoggedIn(session)) return "redirect:/login";
+    	String loggedInUser = getLoggedInUser(session);
+        model.addAttribute("loggedInUser", loggedInUser);
+        model.addAttribute("balance", bankAccountService.getBalanceForUser(loggedInUser));
+        getBalanceForCharities(model);
+        return "charity"; // Returning the view for the logged-in user
+    }
+    
+    private boolean isLoggedIn(HttpSession session) {
+        return getLoggedInUser(session) != null;
+    }
+    
+    private String getLoggedInUser(HttpSession session) {
+        return (String) session.getAttribute("loggedInUser");
+    }
+    
+    private void getBalanceForCharities(Model model) {
+        model.addAttribute("balanceSaveTheForests", bankAccountService.getBalanceForUser("SaveTheForests"));
+        model.addAttribute("balanceFeedTheChildren", bankAccountService.getBalanceForUser("FeedTheChildren"));
+        model.addAttribute("balanceProtectTheAnimals", bankAccountService.getBalanceForUser("ProtectTheAnimals"));
     }
 
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
     
     @PostMapping("/login")
     public String login(@RequestParam String username, @RequestParam String password, Model model, HttpSession session) {
